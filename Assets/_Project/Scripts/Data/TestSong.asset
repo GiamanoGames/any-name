@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bd082d75ec7d5a418f79f41a46deab7, type: 3}
+  m_Name: TestSong
+  m_EditorClassIdentifier: Assembly-CSharp::SongData
+  songTitle: Untitled
+  artistName: Unknown Artist
+  bpm: 120
+  musicalKey: C Major
+  stems:
+  - trackName: 
+    audioClip: {fileID: 8300000, guid: 3a16dd39da525a64aa65f77c7925fc48, type: 3}
+    defaultVolume: 1
+  - trackName: 
+    audioClip: {fileID: 8300000, guid: 85beff575e670fb47bea0e545816ab0f, type: 3}
+    defaultVolume: 1
+  - trackName: 
+    audioClip: {fileID: 8300000, guid: 4a3aec842a102c246b83075264763465, type: 3}
+    defaultVolume: 1

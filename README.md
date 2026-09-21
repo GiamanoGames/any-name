@@ -1,6 +1,8 @@
-# StudioSim — Project Starter Scaffold
+# Music Executive — Recording Studio Simulator
 
-("StudioSim" is a placeholder codename — rename freely once you've got a real title.)
+Project folder: `MusicExec-RecordingStudioSim` (working title for both the
+folder and the game — change either anytime, nothing downstream depends on
+the name).
 
 This is **not** a full Unity project. Unity itself has to generate the `Library/`,
 `Packages/`, `ProjectSettings/`, and `.csproj` files via the Editor — those can't be
@@ -13,7 +15,7 @@ convention, the git setup, and the living docs a real team keeps in the repo.
 C:\Dev\
 └── GiamanoGames\                 ← studio-level folder — just a container, no
     │                                loose files belong directly in it
-    ├── StudioSim\                 ← THIS project's root = one full git repo.
+    ├── MusicExec-RecordingStudioSim\  ← THIS project's root = one full git repo.
     │   │                            Unity creates this folder itself in step 1
     │   │                            below — you never make it by hand.
     │   ├── Assets\                 ← Unity auto-creates this
@@ -45,7 +47,7 @@ C:\Dev\
          it here for consistency; no need to touch it now)
 ```
 
-The six files listed under `StudioSim\` (`.gitignore` through `TOOLCHAIN.md`)
+The six files listed under `MusicExec-RecordingStudioSim\` (`.gitignore` through `TOOLCHAIN.md`)
 are the *only* loose files this scaffold adds — everything else in that tree
 is either Unity-generated or something you'll build over time.
 
