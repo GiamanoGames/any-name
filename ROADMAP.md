@@ -35,7 +35,9 @@ else around it.
       working `SongPlayer` proving sample-accurate multi-stem sync playback
       via `AudioSettings.dspTime` + `PlayScheduled`
 - [ ] Timeline view: load stems as tracks, play/pause/stop, scrub
-- [ ] Per-track volume, pan, mute, solo
+- [ ] Per-track volume, pan, mute, solo — mute done and confirmed working
+      (keyboard 1/2/3, `AudioSource.mute` toggle); volume, pan, and solo
+      still pending, plus a real UI for all of it beyond keyboard testing
 - [ ] `IAudioProcessor` abstraction wrapping Unity's native `AudioMixer` (ParamEQ,
       Compressor, SFX Reverb exposed as runtime-adjustable parameters)
 - [ ] Player can hear an EQ/compression/reverb change in real time
@@ -79,6 +81,19 @@ that ships. Precedent it works: OFFBEAT (a real, shipped Steam title)
 markets itself as "a fully functional audio workstation where all
 instruments are simulated," with every track exportable as a real WAV —
 same approach, well received, no third-party plugin hosting involved.
+
+- [ ] *(Design hook, not required for the playtest)* Rebindable hotkeys via
+      a DAW settings menu, not hardcoded keys forever. Refines the current
+      number-row scheme too: instead of each key directly toggling one
+      track's mute, number keys select/highlight a track (works past 9-10
+      tracks with a scroll/paginate, which the 30-track orchestral
+      challenge will need anyway), and separate keys (mute/solo/pan, all
+      rebindable) act on whichever track is currently selected — closer to
+      how real DAWs handle this, and it scales further than "one key per
+      track" ever could. This is also a concrete reason the already-planned
+      New Input System migration (Phase 3) matters sooner rather than
+      later: rebinding support is a built-in, well-supported feature of
+      that system, not something worth hand-rolling against the legacy one.
 
 ## Cross-Cutting: Difficulty & Time-Scale Modes
 - **Decision (locked):** four presets — Easy, Normal, Hard, Simulation — scale
@@ -226,16 +241,26 @@ Player gives an artist direction, artist responds per personality, retakes.
   Real MIDI hardware (keyboards, pad controllers, MPC-style controllers) is
   supported on top of that, not instead of it. Real path: Minis, an
   established, actively-maintained open-source Unity package (Keijiro
-  Takahashi) built on Unity's New Input System. Worth flagging honestly:
-  this means standardizing keyboard/controller input on the New Input
-  System when we get here, rather than the legacy `Input` class our current
-  mute-key code uses — a clean swap at that point, not a rewrite.
+  Takahashi) built on Unity's New Input System. Update: this collision
+  happened sooner than expected — the URP template's default Player
+  Settings only allowed the New Input System, which broke the
+  legacy-`Input`-based mute controls outright. Fixed for now by setting
+  Active Input Handling to "Both" in Player Settings; the real migration to
+  the New Input System properly (needed for Minis either way) is still
+  deferred to when MIDI support actually gets built, not done piecemeal now.
 - **Quantization (design locked):** recorded note timing snaps to the
   nearest beat subdivision against the song's actual tempo. Free
   architecturally — `SongData.bpm` already exists from Phase 1.
 - **MPC-style pads:** the same interaction pattern already locked in for
   Phase 12's beat-battle step-sequencer/pad grid — not a new system, the
   same UI component reused inside Career mode's Producer desk.
+- **Piano roll (design locked):** a proper MIDI note-grid editor — pitch on
+  one axis, time on the other, same core tool every competing DAW (FL
+  Studio included) builds its workflow around — not just the MPC pads
+  above. Natural fit with what's already planned: anything played live via
+  the virtual/real keyboard or MIDI controller feeds into this view for
+  review and editing, so recording and editing were always going to need
+  this same screen either way.
 - **Guitar amp/cabinet simulation:** a genuinely deep DSP specialty on its
   own — Neural DSP and Kemper exist as companies to do only this. Fits
   architecturally as a particularly demanding `IEffectPlugin` instance, not
@@ -307,6 +332,13 @@ Only once Phases 1–6 are proven fun standalone: build the walkable studio hub
   Render Texture showing a live DAW preview on the in-world monitor's
   screen mesh, so it looks functional before the transition — nice touch,
   not required.
+- **Guided tour/tutorial (design locked):** a full walkthrough of the DAW
+  and every desk, expanding the fictional mentor already called for in the
+  vision doc's tutorial progression (receive demo → sign → record → mix →
+  master → release, etc.). Follows the no-visible-humans rule exactly like
+  everything else — the mentor is a voice on a phone call or a series of
+  text/email messages guiding the player desk to desk, never a rendered
+  character walking them around.
 
 ## Phase 8 — Employees / AI-run roles
 ## Phase 9 — Sandbox / creative mode
@@ -365,6 +397,15 @@ Only once Phases 1–6 are proven fun standalone: build the walkable studio hub
 - Matches the already-locked design exactly: everyone gets the same
   assigned sample set (drum kit, bass, synth, FX), a shared time limit,
   everyone submits, everyone listens together, everyone votes.
+- **Quick mix tools, not the full Career-mode console (design locked):**
+  fast, chunky, immediately-usable controls layer on top of the step-
+  sequencer/pads — per-layer volume/pan, and a couple of high-impact
+  effects, pitch shift especially (genuinely fun and on-theme for casual
+  beat-making). The reasoning for lightweight tools here still holds — full
+  DAW-grade precision mixing is too slow to learn mid-match and heavier to
+  keep synced — but "lightweight" doesn't mean "none." A handful of fast
+  toggles adds real creative range without reintroducing the time-pressure
+  and network-sync problems the step-sequencer choice was made to avoid.
 
 ## Phase 13 — Steam integration, achievements, cloud saves, polish
 

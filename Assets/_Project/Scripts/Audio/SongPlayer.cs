@@ -6,6 +6,14 @@ public class SongPlayer : MonoBehaviour
     public SongData song;
 
     private List<AudioSource> stemSources = new List<AudioSource>();
+    private List<bool> manuallyMuted = new List<bool>();
+    private List<bool> soloed = new List<bool>();
+
+    // Solo keys map to tracks in order: Q=track1, W=track2, E=track3, etc.
+    // Written out explicitly rather than as an offset from KeyCode.Q -
+    // unlike the number row, letters aren't laid out in a way that math
+    // on them would reliably give the next one.
+    private KeyCode[] soloKeys = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y, KeyCode.U, KeyCode.I, KeyCode.O, KeyCode.P };
 
     void Start()
     {
@@ -23,9 +31,11 @@ public class SongPlayer : MonoBehaviour
     {
         for (int i = 0; i < stemSources.Count; i++)
         {
-            KeyCode key = KeyCode.Alpha1 + i;
-            if (Input.GetKeyDown(key))
+            if (Input.GetKeyDown(KeyCode.Alpha1 + i))
                 ToggleMute(i);
+
+            if (i < soloKeys.Length && Input.GetKeyDown(soloKeys[i]))
+                ToggleSolo(i);
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -48,9 +58,11 @@ public class SongPlayer : MonoBehaviour
             source.loop = true;
 
             stemSources.Add(source);
+            manuallyMuted.Add(false);
+            soloed.Add(false);
         }
 
-        Debug.Log("SongPlayer: built " + stemSources.Count + " looping stem(s). Press 1/2/3 to mute, Space to stop.");
+        Debug.Log("SongPlayer: built " + stemSources.Count + " stem(s). Number keys mute, Q/W/E solo, Space stops.");
     }
 
     public void Play()
@@ -70,8 +82,31 @@ public class SongPlayer : MonoBehaviour
     public void ToggleMute(int stemIndex)
     {
         if (stemIndex < 0 || stemIndex >= stemSources.Count) return;
-        AudioSource source = stemSources[stemIndex];
-        source.mute = !source.mute;
-        Debug.Log("SongPlayer: '" + source.gameObject.name + "' " + (source.mute ? "MUTED" : "unmuted"));
+        manuallyMuted[stemIndex] = !manuallyMuted[stemIndex];
+        RefreshAudibleStates();
+    }
+
+    public void ToggleSolo(int stemIndex)
+    {
+        if (stemIndex < 0 || stemIndex >= stemSources.Count) return;
+        soloed[stemIndex] = !soloed[stemIndex];
+        RefreshAudibleStates();
+    }
+
+    // Mute and solo aren't independent - this recalculates what's
+    // ACTUALLY audible from both, the same way a real mixing console
+    // works: if anything is soloed, every non-soloed track goes silent
+    // regardless of its own manual mute state.
+    void RefreshAudibleStates()
+    {
+        bool anySoloed = soloed.Contains(true);
+
+        for (int i = 0; i < stemSources.Count; i++)
+        {
+            bool shouldBeSilent = anySoloed ? !soloed[i] : manuallyMuted[i];
+            stemSources[i].mute = shouldBeSilent;
+
+            Debug.Log("SongPlayer: '" + stemSources[i].gameObject.name + "' now " + (shouldBeSilent ? "SILENT" : "audible") + " (muted=" + manuallyMuted[i] + ", soloed=" + soloed[i] + ")");
+        }
     }
 }
