@@ -9,35 +9,34 @@ public class SongPlayer : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("SongPlayer Start() running.");
-
-        if (song == null)
+        if (song == null || song.stems == null || song.stems.Length == 0)
         {
-            Debug.LogError("SongPlayer: 'Song' field is not assigned in the Inspector.");
+            Debug.LogError("SongPlayer: no valid SongData/stems assigned.");
             return;
         }
-
-        if (song.stems == null || song.stems.Length == 0)
-        {
-            Debug.LogError("SongPlayer: SongData '" + song.name + "' has no stems assigned.");
-            return;
-        }
-
-        Debug.Log("SongPlayer: found " + song.stems.Length + " stem(s) on '" + song.name + "'.");
 
         BuildStemSources();
         Play();
+    }
+
+    void Update()
+    {
+        for (int i = 0; i < stemSources.Count; i++)
+        {
+            KeyCode key = KeyCode.Alpha1 + i;
+            if (Input.GetKeyDown(key))
+                ToggleMute(i);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+            Stop();
     }
 
     void BuildStemSources()
     {
         foreach (StemTrack stem in song.stems)
         {
-            if (stem.audioClip == null)
-            {
-                Debug.LogWarning("SongPlayer: stem '" + stem.trackName + "' has no Audio Clip assigned — skipping.");
-                continue;
-            }
+            if (stem.audioClip == null) continue;
 
             GameObject stemObject = new GameObject("Stem_" + stem.trackName);
             stemObject.transform.parent = transform;
@@ -46,33 +45,33 @@ public class SongPlayer : MonoBehaviour
             source.clip = stem.audioClip;
             source.volume = stem.defaultVolume;
             source.playOnAwake = false;
+            source.loop = true;
 
             stemSources.Add(source);
-            Debug.Log("SongPlayer: built AudioSource for '" + stem.trackName + "' (clip: " + stem.audioClip.name + ", volume: " + stem.defaultVolume + ").");
         }
 
-        Debug.Log("SongPlayer: total playable stem sources built: " + stemSources.Count);
+        Debug.Log("SongPlayer: built " + stemSources.Count + " looping stem(s). Press 1/2/3 to mute, Space to stop.");
     }
 
     public void Play()
     {
-        if (stemSources.Count == 0)
-        {
-            Debug.LogError("SongPlayer: Play() called but there are zero stem sources to play.");
-            return;
-        }
-
+        if (stemSources.Count == 0) return;
         double startTime = AudioSettings.dspTime + 0.1;
         foreach (AudioSource source in stemSources)
-        {
             source.PlayScheduled(startTime);
-            Debug.Log("SongPlayer: scheduled '" + source.gameObject.name + "' at dspTime " + startTime);
-        }
     }
 
     public void Stop()
     {
         foreach (AudioSource source in stemSources)
             source.Stop();
+    }
+
+    public void ToggleMute(int stemIndex)
+    {
+        if (stemIndex < 0 || stemIndex >= stemSources.Count) return;
+        AudioSource source = stemSources[stemIndex];
+        source.mute = !source.mute;
+        Debug.Log("SongPlayer: '" + source.gameObject.name + "' " + (source.mute ? "MUTED" : "unmuted"));
     }
 }
